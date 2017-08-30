@@ -39,7 +39,12 @@
                 </template>
             </el-table-column>
             <el-table-column label="视频说明" prop="text" width="200"></el-table-column>
-            <el-table-column label="视频地址" prop="url"></el-table-column>
+            <el-table-column label="视频地址" prop="url">
+                <template scope="data">
+                    <a :href="vo.origin+'/video/'+data.row._id"
+                       target="_blank">{{vo.origin+'/video/'+data.row._id}}</a>
+                </template>
+            </el-table-column>
             <el-table-column label="操作" width="180px">
                 <template scope="data">
                     <el-button size="small" icon="edit" @click="openDialog('edit',data.row)">编辑</el-button>
@@ -53,8 +58,8 @@
                 <el-form-item label="视频说明" prop="text" :label-width="vo.labelWidth">
                     <el-input v-model="po.video.text"></el-input>
                 </el-form-item>
-                <el-form-item label="视频" prop="img" :label-width="vo.labelWidth">
-                    <input type="file" @change="selectFile($event)" ref="videoFile" v-if="vo.dialog.reloadFile">
+                <el-form-item label="视频" prop="url" :label-width="vo.labelWidth">
+                    <input type="file" @change="selectFile($event)" accept=".mp4" ref="videoFile" v-if="vo.dialog.reloadFile">
                 </el-form-item>
                 <el-form-item label="视频预览" v-if="po.video.url" :label-width="vo.labelWidth">
                     <el-row>
@@ -68,8 +73,6 @@
                         </el-col>
                     </el-row>
                 </el-form-item>
-
-
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="vo.dialog.open = false">取 消</el-button>
@@ -83,7 +86,7 @@
     import {edit, del} from 'apis/video'
     import {VIDEO_LIST} from 'apis/utils/urls'
     import datagrid from 'components/datagrid'
-
+    let origin=window.location.origin
     export default {
         data() {
             return {
@@ -104,10 +107,11 @@
                         reloadFile: true
                     },
                     otherDialogOpen: false,
-                    url: VIDEO_LIST
+                    url: VIDEO_LIST,
+                    origin: origin
                 },
                 rules: {
-                    video: [
+                    url: [
                         {required: true, message: '请选择视频', trigger: 'change'},
                     ],
                     text: [
@@ -128,7 +132,7 @@
                     this.po.video.id = row._id
                     this.po.video.text = row.text
                     this.po.video.url = row.url
-                    this.vo.dialog.title = '添加视频信息'
+                    this.vo.dialog.title = '编辑视频'
                 }
                 this.vo.dialog.mode = mode
                 this.vo.dialog.open = true
@@ -168,12 +172,9 @@
             selectFile(event){
                 if (event.target.files && event.target.files.length) {
                     let file = event.target.files[0]
-                    let reader = new FileReader()
-                    let _self = this
-                    reader.onload = function (e) {
-                        _self.po.video.url = e.target.result;
-                    }
-                    //  reader.readAsDataURL(file);
+                    this.po.video.url=file.name
+                }else{
+                    this.po.video.url=""
                 }
             },
             clearFile(){
@@ -195,7 +196,7 @@
             }
         },
         mounted () {
-
+//            this.vo.origin =
         },
         components: {
             datagrid

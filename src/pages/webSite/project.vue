@@ -92,7 +92,7 @@
                         <el-form-item label="图片或视频" :prop="'files.'+index+'.url'"
                                       :rules="{ required: true, message: '请选择项目文件', trigger: 'blur'}"
                                       :label-width="vo.labelWidth">
-                            <input type="file" @change="selectImg($event,index)">
+                            <input v-if="vo.dialog.reloadFile" type="file" @change="selectImg($event,index)">
                         </el-form-item>
                         <el-form-item label="文件预览" v-if="item.url&&item.url!='video'" :label-width="vo.labelWidth">
                             <el-row>
