@@ -27,7 +27,7 @@
     <div>
         <el-row>
             <el-col :span="24">
-                <div class="jf-header jf-header-block">Vue2.0 ElementUI 后台管理系统（Beta版）
+                <div class="jf-header jf-header-block">简盟后台管理系统 
                     <el-dropdown class="jf-user-menu">
                       <span>用户{{user.name}}<i class="el-icon-caret-bottom el-icon--right"></i>
                       </span>

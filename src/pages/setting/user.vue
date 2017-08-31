@@ -42,11 +42,11 @@
                     {{converToCNDate(data.row.lastLoginTime)}}
                 </template>
             </el-table-column>
-            <el-table-column label="创建人" prop="createor" width="150">
-                <template scope="data">
-                    {{data.row.creator?data.row.creator.name:''}}
-                </template>
-            </el-table-column>
+            <!--<el-table-column label="创建人" prop="createor" width="150">-->
+                <!--<template scope="data">-->
+                    <!--{{data.row.creator?data.row.creator.name:''}}-->
+                <!--</template>-->
+            <!--</el-table-column>-->
             <el-table-column label="创建时间" width="170">
                 <template scope="data">
                     {{converToCNDate(data.row.createTime)}}

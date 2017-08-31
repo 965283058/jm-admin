@@ -83,7 +83,7 @@ module.exports = {
     server: {
         port: 9998,
         proxy: {
-            host: 'http://127.0.0.1',
+            host: 'http://127.0.0.1:9999',
             match: /^\/manage\//
         }
     }

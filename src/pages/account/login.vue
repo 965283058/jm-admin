@@ -72,13 +72,13 @@
 </style>
 <template>
     <div class="box">
-        <el-form :model="po" label-position="left" label-width="0px" class="warp">
+        <el-form :model="po" :rules="vo.rules"  label-position="left" ref="userForm" class="warp">
             <h3 class="title">系统登录</h3>
-            <el-form-item prop="po">
-                <el-input type="text" v-model="po.username" auto-complete="off" placeholder="账号"></el-input>
+            <el-form-item prop="username">
+                <el-input type="text" v-model="po.username" auto-complete="off" placeholder="账号" @keydown.enter.native="login"></el-input>
             </el-form-item>
-            <el-form-item prop="checkPass">
-                <el-input type="password" v-model="po.pwd" auto-complete="off" placeholder="密码"></el-input>
+            <el-form-item prop="pwd">
+                <el-input type="password" v-model="po.pwd" auto-complete="off" placeholder="密码" @keydown.enter.native="login"></el-input>
             </el-form-item>
             <el-form-item style="width:100%;">
                 <el-button type="primary" style="width:100%;" @click="login()">登录
@@ -101,22 +101,33 @@
                     pwd: ''
                 },
                 vo: {
-                    loginErrMsg: ''
+                    loginErrMsg: '',
+                    rules: {
+                        username: [{required: true, message: '请输入账号', trigger: 'blur'}],
+                        pwd: [
+                            {required: true, message: '请输入密码', trigger: 'blur'},
+                            {min: 6, max: 20, message: '长度在6到20个非空字符', trigger: 'blur'}]
+                    }
                 }
             }
         },
         methods: {
             login(){
-                login(this.po).then(data=> {
-                    if (data) {
-                        window.localStorage.setItem("user", JSON.stringify(data))
-                        this.$router.replace("/")
+                this.$refs['userForm'].validate((valid) => {
+                    if (!valid) {
+                        return false
                     }
-                }).catch(err=> {
-                    this.vo.loginErrMsg=''
-                    setTimeout(()=>{
-                        this.vo.loginErrMsg = err.message
-                    },200)
+                    login(this.po).then(data=> {
+                        if (data) {
+                            window.localStorage.setItem("user", JSON.stringify(data))
+                            this.$router.replace("/")
+                        }
+                    }).catch(err=> {
+                        this.vo.loginErrMsg=''
+                        setTimeout(()=>{
+                            this.vo.loginErrMsg = err.message
+                        },200)
+                    })
                 })
             }
         },

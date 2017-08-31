@@ -1,3 +1,9 @@
+<style scope>
+    .dialog--project {
+        width: 80%;
+        max-width: 1024px;
+    }
+</style>
 <template>
     <div>
         <el-form :inline="true" style="padding-top: 20px;padding-left: 30px">
@@ -19,28 +25,26 @@
                 <el-button icon="plus" type="success" @click="openDialog('add')">添加</el-button>
             </el-form-item>
         </el-form>
-
-
         <datagrid :url="vo.url" :params="po.params" ref="dg">
             <el-table-column type="expand">
                 <template scope="data">
                     <el-carousel :interval="5000" type="card" height="200px" arrow="always">
                         <el-carousel-item v-for="file in data.row.files" style="text-align: center">
-                            <div v-if="isVideo(file.url)">
+                            <div v-if="isVideo(file)">
                                 <video style="height:200px" controls>
-                                    <source :src="file.url" type="video/mp4">
+                                    <source :src="file" type="video/mp4">
                                     您的浏览器不支持Video标签。
                                 </video>
                             </div>
                             <div v-else>
-                                <img :src="file.url" style="height: 200px">
+                                <img :src="file" style="height: 200px">
                             </div>
                         </el-carousel-item>
                     </el-carousel>
                 </template>
             </el-table-column>
-            <el-table-column prop="name.cn" label="项目中文名" width="180"></el-table-column>
-            <el-table-column prop="name.en" label="项目英文名" width="180"></el-table-column>
+            <el-table-column prop="cn.name" label="项目中文名" width="180"></el-table-column>
+            <el-table-column prop="en.name" label="项目英文名" width="180"></el-table-column>
 
             <el-table-column prop="time" label="日期" width="120">
                 <template scope="data">
@@ -61,9 +65,9 @@
             </el-table-column>
         </datagrid>
 
-        <el-dialog :title="vo.dialog.title" custom-class="dialog--editor" :visible.sync="vo.dialog.open">
+        <el-dialog :title="vo.dialog.title" custom-class="dialog--project" :visible.sync="vo.dialog.open">
             <el-form ref="projectForm" :model="po.project">
-                <el-tabs type="border-card" v-model="vo.activeTab" @tab-remove="removeFile">
+                <el-tabs type="border-card" v-model="vo.activeTab" @tab-remove="removeFile" style="min-height: 350px">
                     <el-tab-pane label="基本信息" name="base">
                         <el-form-item label="名称(中文)" prop="name_cn"
                                       :rules="{ required: true, message: '请输入中文名称', trigger: 'blur'}"
@@ -87,37 +91,35 @@
                             <el-radio v-model="po.project.type" :label="3">大型</el-radio>
                         </el-form-item>
                     </el-tab-pane>
-                    <el-tab-pane closable :label="'文件'+(index+1)" :name="'tab'+index"
+                    <el-tab-pane label="项目说明">
+                        <el-form-item label="说明(中文)" prop="content_cn"
+                                      :rules="{ required: true, message: '内容不能为空', trigger: 'blur'}"
+                                      :label-width="vo.labelWidth">
+                            <el-input type="textarea" :autosize="{minRows:5}" v-model="po.project.content_cn"
+                                      placeholder="请输入项目说明"></el-input>
+                        </el-form-item>
+                        <el-form-item label="说明(English)" prop="content_en"
+                                      :rules="{ required: true, message: '内容不能为空', trigger: 'blur'}"
+                                      :label-width="vo.labelWidth">
+                            <el-input type="textarea" :autosize="{minRows:5}" v-model="po.project.content_en"
+                                      placeholder="请输入项目说明"></el-input>
+                        </el-form-item>
+                    </el-tab-pane>
+                    <el-tab-pane :label="'文件'+(index+1)" :name="'tab'+index" closable
                                  v-for="(item,index) in po.project.files">
-                        <el-form-item label="图片或视频" :prop="'files.'+index+'.url'"
-                                      :rules="{ required: true, message: '请选择项目文件', trigger: 'blur'}"
+                        <el-form-item label="图片或视频" :prop="'files.'+index"
+                                      :rules="{ required: true, message: '请选择项目文件', trigger: 'change'}"
                                       :label-width="vo.labelWidth">
                             <input v-if="vo.dialog.reloadFile" type="file" @change="selectImg($event,index)">
                         </el-form-item>
-                        <el-form-item label="文件预览" v-if="item.url&&item.url!='video'" :label-width="vo.labelWidth">
-                            <el-row>
-                                <el-col :span="24">
-                                    <div class="grid-content bg-purple-dark">
-                                        <img :src="item.url" alt="" class="imgPerview" v-if="!isVideo(item.url)">
-                                        <video controls width="300" v-if="isVideo(item.url)">
-                                            <source :src="item.url" type="video/mp4">
-                                            您的浏览器不支持Video标签。
-                                        </video>
-                                    </div>
-                                </el-col>
-                            </el-row>
-                        </el-form-item>
-                        <el-form-item label="说明(中文)" :prop="'files.'+index+'.cn'"
-                                      :rules="{ required: true, message: '内容不能为空', trigger: 'blur'}"
-                                      :label-width="vo.labelWidth">
-                            <el-input type="textarea" :autosize="{minRows:5}" v-model="item.cn"
-                                      placeholder="请输入项目名称"></el-input>
-                        </el-form-item>
-                        <el-form-item label="说明(English)" :prop="'files.'+index+'.en'"
-                                      :rules="{ required: true, message: '内容不能为空', trigger: 'blur'}"
-                                      :label-width="vo.labelWidth">
-                            <el-input type="textarea" :autosize="{minRows:5}" v-model="item.en"
-                                      placeholder="请输入项目名称"></el-input>
+                        <el-form-item label="文件预览" v-if="item&&item!='video'" :label-width="vo.labelWidth">
+                            <file-view>
+                                <img :src="item" alt="" class="imgPerview" v-if="!isVideo(item)">
+                                <video controls width="300" v-if="isVideo(item)">
+                                    <source :src="item" type="video/mp4">
+                                    您的浏览器不支持Video标签。
+                                </video>
+                            </file-view>
                         </el-form-item>
                     </el-tab-pane>
                 </el-tabs>
@@ -136,6 +138,7 @@
     import {PROJECT_LIST} from 'apis/utils/urls'
 
     import datagrid from 'components/datagrid'
+    import fileView from 'components/filePreview'
 
     export default {
         data() {
@@ -145,13 +148,11 @@
                         id: '',
                         name_cn: '',
                         name_en: '',
+                        content_cn: '',
+                        content_en: '',
                         time: null,
                         type: 1,
-                        files: [{
-                            url: '',
-                            cn: '',
-                            en: ''
-                        }]
+                        files: []
                     },
                     params: {
                         name_cn: '',
@@ -177,36 +178,36 @@
                 this.clearFile()
                 this.vo.dialog.open = true
                 this.$nextTick(()=>{
-                    this.$refs['projectForm'].resetFields()
-                    this.vo.activeTab = 'base'
-                    if (mode == 'add') {
-                        this.po.project = {
-                            id: '',
-                            name_cn: '',
-                            name_en: '',
-                            time: null,
-                            type: 1,
-                            files: [{
-                                url: '',
-                                cn: '',
-                                en: ''
-                            }]
-                        }
-                        this.vo.dialog.title = '添加项目'
-                    } else {
-                        let temp = JSON.parse(JSON.stringify(row))
-                        this.po.project = {
-                            id: temp._id,
-                            name_cn: temp.name.cn,
-                            name_en: temp.name.en,
-                            time: new Date(temp.time),
-                            type: temp.type,
-                            files: temp.files
-                        }
-                        this.vo.dialog.title = '修改项目'
+                this.$refs['projectForm'].resetFields()
+                this.vo.activeTab = 'base'
+                if (mode == 'add') {
+                    this.po.project = {
+                        id: '',
+                        name_cn: '',
+                        name_en: '',
+                        content_cn: '',
+                        content_en: '',
+                        time: null,
+                        type: 1,
+                        files: ['']
                     }
-                    this.vo.dialog.mode = mode
-                })
+                    this.vo.dialog.title = '添加项目'
+                } else {
+                    let temp = JSON.parse(JSON.stringify(row))
+                    this.po.project = {
+                        id: temp._id,
+                        name_cn: temp.cn.name,
+                        name_en: temp.en.name,
+                        content_cn: temp.cn.content,
+                        content_en: temp.en.content,
+                        time: new Date(temp.time),
+                        type: temp.type,
+                        files: temp.files
+                    }
+                    this.vo.dialog.title = '修改项目'
+                }
+                this.vo.dialog.mode = mode
+            })
 
             },
             editProject(){
@@ -221,27 +222,24 @@
 
                     fd.append("name_cn", this.po.project.name_cn)
                     fd.append("name_en", this.po.project.name_en)
+                    fd.append("content_cn", this.po.project.content_cn)
+                    fd.append("content_en", this.po.project.content_en)
                     fd.append("time", this.po.project.time)
                     fd.append("type", this.po.project.type)
 
-                    let contents = []
+                    let urls = []
                     let index = 0
-
                     let files = this.$refs['projectForm'].$el.querySelectorAll('input[type=file]')
                     for (let item of this.po.project.files) {
-                        let temp = {
-                            cn: item.cn,
-                            en: item.en
-                        }
                         if (files[index].files.length) {
                             fd.append("file" + index, files[index].files[0])
+                            urls.push('')
                         } else {
-                            temp.url = this.po.project.files[index].url
+                            urls.push(this.po.project.files[index])
                         }
-                        contents.push(temp)
                         index++
                     }
-                    fd.append("contents", JSON.stringify(contents))
+                    fd.append("urls", JSON.stringify(urls))
 
                     edit(fd).then(data=> {
                         this.loadList()
@@ -257,10 +255,7 @@
                 })
             },
             addFile(){
-                this.po.project.files.push({
-                    cn: '',
-                    en: ''
-                })
+                this.po.project.files.push('')
                 this.vo.activeTab = 'tab' + (this.po.project.files.length - 1)
             },
             removeFile(name){
@@ -287,11 +282,11 @@
                         let reader = new FileReader()
                         let _self = this
                         reader.onload = function (e) {
-                            _self.$set(_self.po.project.files[index], 'url', e.target.result)
+                            _self.$set(_self.po.project.files, index, e.target.result)
                         }
                         reader.readAsDataURL(file);
                     } else {
-                        this.$set(this.po.project.files[index], 'url', 'video')
+                        this.$set(this.po.project.files, index, 'video')
                         console.info(this.po.project)
                     }
                 }
@@ -334,7 +329,8 @@
 
         },
         components: {
-            datagrid
+            datagrid,
+            fileView
         }
     }
 </script>
