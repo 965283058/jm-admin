@@ -28,16 +28,15 @@
         <datagrid :url="vo.url" :params="po.params" ref="dg">
             <el-table-column type="expand">
                 <template scope="data">
-                    <el-carousel :interval="5000" type="card" height="200px" arrow="always">
-                        <el-carousel-item v-for="file in data.row.files" style="text-align: center">
-                            <div v-if="isVideo(file)">
-                                <video style="height:200px" controls>
-                                    <source :src="file" type="video/mp4">
+                    <el-carousel :interval="5000" type="card" arrow="always" trigger="click">
+                        <el-carousel-item v-for="item in data.row.files" style="text-align: center">
+                            <div>
+                                <img :src="item.url" style="height:200px" v-if="item.mode==1">
+                                <video style="height:200px" controls v-if="item.mode==2">
+                                    <source :src="item.url" type="video/mp4">
                                     您的浏览器不支持Video标签。
                                 </video>
-                            </div>
-                            <div v-else>
-                                <img :src="file" style="height: 200px">
+                                <div v-html="item.url" v-if="item.mode==3"></div>
                             </div>
                         </el-carousel-item>
                     </el-carousel>
@@ -107,18 +106,35 @@
                     </el-tab-pane>
                     <el-tab-pane :label="'文件'+(index+1)" :name="'tab'+index" closable
                                  v-for="(item,index) in po.project.files">
-                        <el-form-item label="图片或视频" :prop="'files.'+index"
+                        <el-form-item label="文件类型" :label-width="vo.labelWidth">
+                            <el-radio v-model="item.mode" :label="1">图片( jpg、png、jpeg、gif、bmp格式 )</el-radio>
+                            <el-radio v-model="item.mode" :label="2">视频( MP4格式 )</el-radio>
+                            <el-radio v-model="item.mode" :label="3">视频外链</el-radio>
+                        </el-form-item>
+
+                        <el-form-item v-if="item.mode!=3" :label="item.mode==1?'图片':'视频'" :prop="'files.'+index+'.url'"
                                       :rules="{ required: true, message: '请选择项目文件', trigger: 'change'}"
                                       :label-width="vo.labelWidth">
-                            <input v-if="vo.dialog.reloadFile" type="file" @change="selectImg($event,index)">
+                            <input v-if="vo.dialog.reloadFile" type="file" :name="'file'+index"
+                                   :accept="item.mode==1?'.jpg,.png,.jpeg,.gif,.bmp':'.mp4'"
+                                   @change="selectFile($event,index)">
                         </el-form-item>
-                        <el-form-item label="文件预览" v-if="item&&item!='video'" :label-width="vo.labelWidth">
+
+                        <el-form-item v-if="item.mode==3" label="视频外链" :prop="'files.'+index+'.url'"
+                                      :rules="{ required: true, message: '请输入视频外链地址', trigger: 'blur'}"
+                                      :label-width="vo.labelWidth">
+                            <el-input type="textarea" :autosize="{minRows:5}" v-model="item.url"
+                                      placeholder="请输入视频外链地址"></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="文件预览" v-if="item.url&&item.url!='video'" :label-width="vo.labelWidth">
                             <file-view>
-                                <img :src="item" alt="" class="imgPerview" v-if="!isVideo(item)">
-                                <video controls width="300" v-if="isVideo(item)">
-                                    <source :src="item" type="video/mp4">
+                                <img :src="item.url" v-if="item.mode==1">
+                                <video controls width="300" v-if="item.mode==2">
+                                    <source :src="item.url" type="video/mp4">
                                     您的浏览器不支持Video标签。
                                 </video>
+                                <div v-html="item.url" v-if="item.mode==3"></div>
                             </file-view>
                         </el-form-item>
                     </el-tab-pane>
@@ -152,7 +168,7 @@
                         content_en: '',
                         time: null,
                         type: 1,
-                        files: []
+                        files: [{url: '', mode: 1}]
                     },
                     params: {
                         name_cn: '',
@@ -177,37 +193,41 @@
             openDialog(mode, row){
                 this.clearFile()
                 this.vo.dialog.open = true
-                this.$nextTick(()=>{
-                this.$refs['projectForm'].resetFields()
-                this.vo.activeTab = 'base'
-                if (mode == 'add') {
-                    this.po.project = {
-                        id: '',
-                        name_cn: '',
-                        name_en: '',
-                        content_cn: '',
-                        content_en: '',
-                        time: null,
-                        type: 1,
-                        files: ['']
-                    }
-                    this.vo.dialog.title = '添加项目'
-                } else {
-                    let temp = JSON.parse(JSON.stringify(row))
-                    this.po.project = {
-                        id: temp._id,
-                        name_cn: temp.cn.name,
-                        name_en: temp.en.name,
-                        content_cn: temp.cn.content,
-                        content_en: temp.en.content,
-                        time: new Date(temp.time),
-                        type: temp.type,
-                        files: temp.files
-                    }
-                    this.vo.dialog.title = '修改项目'
-                }
                 this.vo.dialog.mode = mode
-            })
+                this.$nextTick(()=> {
+                    try {
+                        this.$refs['projectForm'].resetFields()
+                    } catch (e) {}
+                    this.vo.activeTab = 'base'
+
+                    if (mode == 'add') {
+                        this.po.project = {
+                            id: '',
+                            name_cn: '',
+                            name_en: '',
+                            content_cn: '',
+                            content_en: '',
+                            time: null,
+                            type: 1,
+                            files: [{url: '', mode: 1}]
+                        }
+                        this.vo.dialog.title = '添加项目'
+
+                    } else {
+                        let temp = JSON.parse(JSON.stringify(row))
+                        this.po.project = {
+                            id: temp._id,
+                            name_cn: temp.cn.name,
+                            name_en: temp.en.name,
+                            content_cn: temp.cn.content,
+                            content_en: temp.en.content,
+                            time: new Date(temp.time),
+                            type: temp.type,
+                            files: temp.files
+                        }
+                        this.vo.dialog.title = '修改项目'
+                    }
+                })
 
             },
             editProject(){
@@ -229,17 +249,23 @@
 
                     let urls = []
                     let index = 0
-                    let files = this.$refs['projectForm'].$el.querySelectorAll('input[type=file]')
+                    let formDom = this.$refs['projectForm'].$el
                     for (let item of this.po.project.files) {
-                        if (files[index].files.length) {
-                            fd.append("file" + index, files[index].files[0])
-                            urls.push('')
+                        if (item.mode == 1 || item.mode == 2) {
+                            let file = formDom.querySelector('input[name=file' + index + ']')
+                            if (file && file.files.length) {
+                                fd.append("file" + index, file.files[0])
+                                urls.push({mode: item.mode})
+                            } else {
+                                urls.push({mode: item.mode, url: item.url})
+                            }
+
                         } else {
-                            urls.push(this.po.project.files[index])
+                            urls.push({mode: item.mode, url: item.url})
                         }
                         index++
                     }
-                    fd.append("urls", JSON.stringify(urls))
+                    fd.append("files", JSON.stringify(urls))
 
                     edit(fd).then(data=> {
                         this.loadList()
@@ -255,7 +281,7 @@
                 })
             },
             addFile(){
-                this.po.project.files.push('')
+                this.po.project.files.push({url: '', mode: 1})
                 this.vo.activeTab = 'tab' + (this.po.project.files.length - 1)
             },
             removeFile(name){
@@ -274,7 +300,7 @@
                     }
                 }
             },
-            selectImg(event, index){
+            selectFile(event, index){
                 let files = event.target.files
                 if (files && files.length) {
                     let file = files[0]
@@ -282,12 +308,11 @@
                         let reader = new FileReader()
                         let _self = this
                         reader.onload = function (e) {
-                            _self.$set(_self.po.project.files, index, e.target.result)
+                            _self.$set(_self.po.project.files[index], 'url', e.target.result)
                         }
                         reader.readAsDataURL(file);
                     } else {
-                        this.$set(this.po.project.files, index, 'video')
-                        console.info(this.po.project)
+                        this.$set(this.po.project.files[index], 'url', 'video')
                     }
                 }
             },

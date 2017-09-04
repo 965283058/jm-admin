@@ -1,4 +1,6 @@
-<style scoped></style>
+<style scoped>
+
+</style>
 <template>
     <div>
         <el-row>
