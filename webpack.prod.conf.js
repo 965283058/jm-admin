@@ -46,7 +46,8 @@ module.exports = {
         new webpack.optimize.CommonsChunkPlugin('vendors', 'js/vendors.[hash:7].js'),
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            template: path.resolve(__dirname, 'index.html')
+            template: path.resolve(__dirname, 'index.html'),
+            staticRoot:'/tm-admin'
         }),
         new CopyWebpackPlugin([
             {
