@@ -98,7 +98,7 @@
         components: {},
         methods: {
             addMenu(data){
-                if (this.menus.some(menu=>menu.text == data.text)) {
+                if (this.menus.some(menu=>menu.label == data.text)) {
                     this.activeMenu = data.code
                     this.$router.replace(data.code)
                     return
@@ -143,7 +143,7 @@
                         this.$router.replace("/login")
                     })
                 }).catch(() => {
-                   console.info("cancel logout")
+                 //  console.info("cancel logout")
                 });
             },
             getMenu(){

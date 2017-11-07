@@ -38,7 +38,6 @@ function loading(show, text) {
     if (show) {
         this._loading = Loading.service({fullscreen: true, text: text})
     } else {
-        console.info(this._loading)
         this._loading&&this._loading.close()
     }
 }

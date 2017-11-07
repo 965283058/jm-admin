@@ -1,14 +1,6 @@
-<style scope>
-    .title {
-        font-size: 22px;
-        font-weight: bold;
-    }
-</style>
 <template>
     <div>
-
         <el-form ref="teamminusForm" :model="po">
-
             <el-tabs type="border-card">
                 <el-tab-pane label="中文信息">
                     <el-form-item label="图片" prop="cn_img"

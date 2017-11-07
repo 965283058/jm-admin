@@ -128,7 +128,6 @@
                     let _self = this
                     reader.onload = function (e) {
                         _self.po.people.img = e.target.result;
-                        console.info(e.target.result)
                     }
                     reader.readAsDataURL(file);
                 }

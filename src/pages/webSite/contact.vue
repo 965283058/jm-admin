@@ -100,7 +100,7 @@
                 </el-tab-pane>
             </el-tabs>
         </el-form>
-        <div slot="footer" class="dialog-footer">
+        <div slot="footer" class="form-footer">
             <el-button @click="vo.dialog.open = false">取 消</el-button>
             <el-button type="primary" @click="edit()">确 定</el-button>
         </div>

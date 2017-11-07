@@ -142,12 +142,8 @@
         },
         methods: {
             openDialog(mode, row){
-              //  this.vo.reloadTree = false
-
-
                 if (mode == 'add') {
                     this.po.user = JSON.parse(JSON.stringify(this.po.user_add))
-                    console.info(this.po.user)
                     this.vo.dialog.title = '添加管理员'
                 } else {
                     this.po.user = {
@@ -163,8 +159,6 @@
                 this.vo.dialog.open = true
 
                 this.$nextTick(()=> {
-                    //  this.vo.reloadTree = true
-                    console.info(this.$refs['powerMenu'])
                     if(row){
                         for(let key of row.power){
                             this.$refs['powerMenu'].setChecked(key,true,false)
@@ -211,7 +205,6 @@
                     let _self = this
                     reader.onload = function (e) {
                         _self.po.people.img = e.target.result;
-                        console.info(e.target.result)
                     }
                     reader.readAsDataURL(file);
                 }

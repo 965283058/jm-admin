@@ -196,7 +196,6 @@
                 } else {
                     let temp=JSON.parse(JSON.stringify(row))
                     temp.id=temp._id
-                    console.info(temp)
                     this.po.people = temp
                     this.vo.dialog.title = '修改人员介绍'
                 }
@@ -248,7 +247,6 @@
                     let _self = this
                     reader.onload = function (e) {
                         _self.po.people.img = e.target.result;
-                        console.info(e.target.result)
                     }
                     reader.readAsDataURL(file);
                 }
