@@ -20,7 +20,7 @@
             },
             uploadPath: {
                 type: String,
-                dufault: ''
+                default: ''
             },
             value: String,
             readonly: {
@@ -60,10 +60,10 @@
                 let self = this
                 this.$nextTick(()=> {
                     self.editor = KindEditor.create('#' + self.id, {
-                        width:this.getUnit(self.elWidth),
-                        height: this.getUnit(self.elHeight) ,
-                        minWidth: this.getUnit(self.elWidth),
-                        minHeight: this.getUnit(self.elHeight),
+                        width:self.getUnit(self.elWidth),
+                        height: self.getUnit(self.elHeight) ,
+                        minWidth: self.getUnit(self.elWidth),
+                        minHeight: self.getUnit(self.elHeight),
                         allowFileManager: false,
                         filePostName: 'file',
                         uploadJson: self.uploadPath,
@@ -84,13 +84,14 @@
                 this.elHeight = this.editor.height
                 KindEditor.remove('#' + this.id);
                 this.editor.remove()
+                this.editor=null
                 this.id = null
             },
             getUnit(value){
                 if(String(value).split('').pop()=="%"){
                     return value
                 }else{
-                    return Number.parseFloat(self.elHeight) + 'px'
+                    return Number.parseFloat(value) + 'px'
                 }
             }
         },
